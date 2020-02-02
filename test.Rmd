@@ -1,0 +1,95 @@
+---
+title: "QoL Data_Analysis_notebook"
+author: "Yunbo Zhu"
+date: "1/7/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Purpose of this Analysis
+Give a first glimpse on Columbia University's 2019 Quality of Life Survey data and provide foundamental suggestions
+
+## Step 1
+Import the data set from the driven location and clean the data
+```{r}
+library(tidyverse)
+library(readxl)
+mydata<-read_excel("/Users/katherine/Desktop/test_data.xlsx")
+```
+
+## Step 2: Visualization
+i. Create a histogram of respondents according to their program (M.S, PhD, etc.)
+```{r echo=FALSE}
+colnames(mydata)<-c('department','program','Themed social events','Off-Campus socials',
+                    'Interschool events','Performance Arts','Events organized by student groups',
+                    'Entertainment','PDL core Module')
+mydata<-mydata[-1,]%>%drop_na(department,program)
+histplot<-ggplot(mydata,aes(program))+
+  geom_histogram(stat = "count")+
+  labs(title = "histogram of respondents")+theme_classic()+coord_flip()
+  theme(plot.title = element_text(hjust = 0.5))
+histplot
+```
+
+ii. Create a pie-chart representing the percentage of respondents by department
+```{r}
+data<-mydata%>%group_by(department)%>%summarise(count = n())%>%arrange(desc(department))%>%
+  mutate(prop = count/sum(count)*100)%>%
+  mutate(ypos = cumsum(prop)-0.5*prop)%>%
+  mutate(abbr = abbreviate(department))
+piechart<-ggplot(data,aes(x = "",y = prop,fill = department))+
+  geom_bar(stat = "identity",width = 1,color = "white")+
+  coord_polar("y",start = 0)+theme_void()+
+  geom_text(aes(y = ypos,label = abbr),color = "black",size = 2)+
+  scale_fill_brewer(palette = "Spectral")
+piechart
+```
+
+## Step 3: Data Exploration
+**i. How do the respondents feel about PDL core classes?**
+
+From the table below, there are more then half of the respondents satisfy with the PDL core classes and there are 
+about 17% the of the respondents strongly satisfy with the classes. So in all, most of the respondents (about 70%)
+are satified with the PDL core classes
+```{r}
+data_pdl<-mydata%>%drop_na()%>%group_by(`PDL core Module`)%>%
+  summarise(count = n())%>%mutate(perc = count/sum(count))
+data_pdl
+```
+
+**ii. To Determine which department is the most satisfied with PDL core classes?**
+
+From the table below, Electrical Engineering department has the most percentage of satisfied rate (Agree and Strongly Agree with the PDL)
+```{r}
+data_pdl2<-mydata%>%drop_na()%>%
+  group_by(department,`PDL core Module`)%>%
+  summarise(count = n())%>%
+  mutate(perc = count/sum(count))%>%
+  filter(`PDL core Module`%in%c('Agree','Strongly agree'))%>%
+  summarise(satisfied = sum(perc))%>%
+  arrange(desc(satisfied))
+data_pdl2
+```
+
+## Step 4: Summary
+From the visualization of all five events, interschool events (Festifall, Mel's Burger Bar Mixer, Poker Night, etc.)
+and off-campus socials (Boat Cruise, Rooftop socials, etc.) are more welcomed by respondents. 
+I would recommend the student council to put more budget on these two types of events or hold more of them. Also, 
+apparently from the plot, the percentage of neutral position (Neither agree nor disagree) is higher compared with survey
+on PDL classes. So I recommend the Student Council to collect suggestions from the respondents that what other kind of 
+events they want.
+
+```{r}
+data_events<-mydata%>%drop_na()%>%
+  pivot_longer(3:7,names_to = "events",values_to = "satisfy or not")%>%
+  group_by(events,`satisfy or not`)%>%count()
+event_plot<-ggplot(data_events,aes(x = "",y = n,fill =`satisfy or not`))+
+  geom_bar(stat = "identity",width = 1,color = "white")+
+  coord_polar("y",start = 0)+
+  theme_void()+
+  facet_wrap(~events)
+event_plot
+```
