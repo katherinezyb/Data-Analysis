@@ -42,4 +42,5 @@ This project chose the data of the 2020 Q2 which contains 13,303 users with 150 
 - Logistic Regression
 - Random Forest
 - XGBoost
+
 Compare performances of different binary classification models on metrics of F1-score, Accuracy, AUC ROC
