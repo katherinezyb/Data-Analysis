@@ -31,16 +31,22 @@ This project chose the data of the 2020 Q2 which contains 13,303 users with 150 
 
 ### Data Cleaning & Preprocessing
 - Missing value
-- ordinal and nominal variables
-- Handle imbalanced data
+- ordinal and nominal variables -> One Hot encoding
+- Handle imbalanced data -> oversampling
 
 ### EDA
 - Distribution, outliers
 - Bivariate Analysis
+- Correlation matrix -> exclude correlated feature -> avoid collinearity
 
 ### Modeling
 - Logistic Regression
 - Random Forest
+    1. tune model by GridSearchCV
+    2. find optimal model using scoring of Recall to maximize true possitive
 - XGBoost
+
+### Evaluation
+
 
 Compare performances of different binary classification models on metrics of F1-score, Accuracy, AUC ROC
